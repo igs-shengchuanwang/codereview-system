@@ -1,0 +1,44 @@
+# ============================================
+# AI Code Review System — 專案配置檔
+# ============================================
+# 複製此檔案並依照你的專案填入對應值。
+# review-system 的所有指令、prompt、腳本都會讀取此配置。
+
+# --- 專案基本資訊 ---
+project:
+  name: "MyProject"                          # 專案名稱（用於網站標題、文件標頭）
+  description: "AI code review 知識庫"         # 專案描述
+  language: "TypeScript"                      # 主要程式語言
+
+# --- 路徑設定 ---
+paths:
+  source_dir: "src/"                          # 原始碼根目錄（相對於 repo root）
+  source_glob: "src/**/*.ts"                  # 原始碼掃描 glob pattern
+  docs_dir: "docs/"                           # 知識庫文件目錄
+  knowledge_dir: "docs/knowledge/"            # 知識庫根目錄
+  classes_dir: "docs/knowledge/classes/"       # class 文件目錄
+  concepts_dir: "docs/knowledge/concepts/"     # concept 文件目錄
+  coverage_file: "docs/knowledge/_meta/coverage.md"  # 覆蓋率追蹤檔
+  seed_file: ""                               # seed data 全局總覽文件（初次跑完後填入）
+
+# --- Git / CI ---
+git:
+  repo_url: "https://github.com/your-org/your-repo"   # GitHub repo URL
+  branch: "main"                              # 預設分支
+  docs_deploy_source: "./docs"                # GitHub Pages 部署來源
+
+# --- VitePress 站台 ---
+site:
+  title: "MyProject Knowledge Base"           # 網站標題
+  base: "/"                                   # VitePress base path（GitHub Pages 用 /repo-name/）
+
+# --- Review 設定 ---
+review:
+  class_prefix: ""                            # class 名稱前綴過濾（例如 "HexaSort"，空字串表示不過濾）
+  export_pattern: "export class"              # 掃描 class 用的 grep pattern
+  first_batch: []                             # 首輪 review 目標（bootstrap 時自動填入）
+  # 範例：
+  # first_batch:
+  #   - { type: "class",   name: "GameEngine" }
+  #   - { type: "class",   name: "PlayerController" }
+  #   - { type: "concept", name: "combat-system" }
