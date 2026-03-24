@@ -18,6 +18,9 @@
 2. 確認 `docs/.vitepress/config.ts` 已設定：
    - `title` 對應 `config/project.yaml` 的 `site.title`
    - `base` 對應 `config/project.yaml` 的 `site.base`
+     - 若 `site.base` 已填寫則直接使用
+     - 若未填寫，預設為 `/codereview-sites/{repo-name}/`（`repo-name` 取自 `project.yaml` 的 `git.repo_url` 最後一段路徑，例如 `https://github.com/org/partygo-client-MiniGame-os` → `partygo-client-MiniGame-os`）
+     - 詢問使用者：「VitePress base 路徑預設為 `/codereview-sites/{repo-name}/`，是否沿用或自訂？」，確認後寫回 `project.yaml`
    - sidebar 自動掃描 `knowledge/classes/` 和 `knowledge/concepts/`
 3. 確認 `docs/index.md` 首頁包含：
    - Classes 與 Concepts 兩個入口連結
@@ -35,6 +38,8 @@
 ---
 
 ## github-pages-deploy
+
+> **注意**：此任務目前標記為 `skip`（暫不實現），除非使用者明確要求，否則不執行。
 
 執行條件：任務為 `github-pages-deploy`，且 `vitepress-setup` 已為 `reviewed`
 

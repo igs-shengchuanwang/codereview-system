@@ -34,7 +34,7 @@
 | 任務 | 說明 | 狀態 | 完成日期 | 備注 |
 |------|------|------|----------|------|
 | vitepress-setup | VitePress 設定 + 導航 + Mermaid 支援 | pending | — | — |
-| github-pages-deploy | GitHub Actions + Pages 自動部署 | pending | — | 依賴 vitepress-setup |
+| github-pages-deploy | GitHub Actions + Pages 自動部署 | skip | — | 暫不實現，依賴 vitepress-setup |
 
 ---
 
