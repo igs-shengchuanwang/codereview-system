@@ -12,20 +12,21 @@ symptoms: [遊戲卡住不動, 畫面沒反應, 狀態異常, 初始化失敗]
 **管理遊戲主循環與全域狀態調度，驅動所有子系統按序執行。**
 它「不」負責具體的業務邏輯（如戰鬥計算、UI 渲染）——那些由各個 Controller/Manager 處理。
 
-## 在架構中的位置
+## 架構位置圖
 
-**Core Layer**。在整個系統中居於最上層調度位置：
+此圖呈現 GameEngine 在系統中的核心調度位置及其上下游依賴：
 
-```
-Application Entry
-    │
-    ▼
-GameEngine（主循環調度 + 全域狀態）
-    │
-    ├──▶ StateManager（狀態管理）
-    ├──▶ SceneController（場景切換）
-    ├──▶ InputSystem（輸入處理）
-    └──▶ EventBus（事件分發）
+```mermaid
+graph TD
+    App["Application.main()"] --> GE["GameEngine"]
+    GE --> SM["StateManager"]
+    GE --> SC["SceneController"]
+    GE --> IS["InputSystem"]
+    GE -.->|"emit: GAME_INIT<br/>GAME_START<br/>GAME_END"| EB["EventBus"]
+    EB -.->|"listen"| UI["UIController"]
+    EB -.->|"listen"| Audio["AudioManager"]
+
+    style GE fill:#f9f,stroke:#333,stroke-width:3px
 ```
 
 ## 關鍵依賴
@@ -39,6 +40,22 @@ GameEngine（主循環調度 + 全域狀態）
 - `SceneController` — 場景載入與切換
 - `EventBus.emit()` — 發送生命週期事件（`GAME_INIT`, `GAME_START`, `GAME_PAUSE`, `GAME_END`）
 
+## 生命週期 / 狀態圖
+
+GameEngine 的生命週期狀態轉換：
+
+```mermaid
+stateDiagram-v2
+    [*] --> Idle
+    Idle --> Initializing: init(config)
+    Initializing --> Running: start()
+    Running --> Paused: pause()
+    Paused --> Running: resume()
+    Running --> Destroyed: destroy()
+    Paused --> Destroyed: destroy()
+    Destroyed --> [*]
+```
+
 ## 重要方法
 
 | 方法 | 說明 |
@@ -48,6 +65,38 @@ GameEngine（主循環調度 + 全域狀態）
 | `tick(dt)` | 每幀呼叫，依序更新所有子系統 |
 | `pause() / resume()` | 暫停/恢復主循環 |
 | `destroy()` | 清理所有資源，發送 GAME_END |
+
+## 核心流程時序圖
+
+此圖展示 GameEngine 啟動後一幀更新的完整呼叫順序：
+
+```mermaid
+sequenceDiagram
+    participant App as Application
+    participant GE as GameEngine
+    participant IS as InputSystem
+    participant SM as StateManager
+    participant SC as SceneController
+    participant EB as EventBus
+
+    App->>GE: init(config)
+    GE->>SM: initialize()
+    GE->>SC: initialize()
+    GE->>EB: emit(GAME_INIT)
+    App->>GE: start()
+    GE->>EB: emit(GAME_START)
+
+    loop 每幀
+        GE->>IS: processInput()
+        GE->>SM: update(dt)
+        GE->>SC: update(dt)
+    end
+
+    App->>GE: destroy()
+    GE->>EB: emit(GAME_END)
+    GE->>SM: cleanup()
+    GE->>SC: cleanup()
+```
 
 ## 學習要點
 

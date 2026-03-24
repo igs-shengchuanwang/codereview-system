@@ -23,21 +23,57 @@ symptoms: [遊戲卡頓, 幀率不穩, 更新順序錯誤, 狀態不同步]
 4. **暫停/恢復**：外部可呼叫 `pause()` / `resume()` 暫停循環
 5. **結束**：`GameEngine.destroy()` 清理資源
 
+## 時序圖
+
+此圖展示主循環啟動到每幀更新的完整互動順序：
+
+```mermaid
+sequenceDiagram
+    participant App as Application
+    participant GE as GameEngine
+    participant IS as InputSystem
+    participant SM as StateManager
+    participant SC as SceneController
+    participant EB as EventBus
+
+    App->>GE: init(config)
+    GE->>SM: initialize()
+    GE->>SC: initialize()
+    GE->>EB: emit(GAME_INIT)
+
+    App->>GE: start()
+    GE->>EB: emit(GAME_START)
+
+    loop 每幀更新
+        GE->>IS: processInput()
+        IS-->>GE: inputEvents
+        GE->>SM: update(dt)
+        alt 狀態切換觸發
+            SM->>SC: loadScene(newScene)
+        end
+        GE->>SC: update(dt)
+    end
+
+    App->>GE: destroy()
+    GE->>EB: emit(GAME_END)
+```
+
 ## 流程圖
+
+此圖展示每幀 tick 內部的決策邏輯：
 
 ```mermaid
 flowchart TD
-    A[Application.main] --> B[GameEngine.init]
-    B --> C[GameEngine.start]
-    C --> D{主循環}
-    D --> E[處理輸入]
-    E --> F[更新邏輯]
-    F --> G[更新動畫]
+    A[tick 開始] --> B{isPaused?}
+    B -->|是| Z[跳過本幀]
+    B -->|否| C[處理輸入]
+    C --> D[更新邏輯]
+    D --> E{狀態是否切換?}
+    E -->|是| F[載入新場景]
+    E -->|否| G[更新動畫]
+    F --> G
     G --> H[渲染]
-    H --> D
-    D -->|pause| I[暫停]
-    I -->|resume| D
-    D -->|destroy| J[結束清理]
+    H --> I[tick 結束]
 ```
 
 ## 涉及的 class 與各自職責
